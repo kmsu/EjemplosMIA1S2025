@@ -1,0 +1,5 @@
+#mkdisk -Size=3000 -unit=K -path=/home/kevin/Documentos/EjemplosMIA1S2025/Proyecto/Discos/Disco1.mia
+
+#execute -path=script.txt
+
+mkdisk -Size=1 -unit=K -path=./Discos/Disco1.mia

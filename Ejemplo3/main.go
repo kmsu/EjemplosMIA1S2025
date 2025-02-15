@@ -93,5 +93,4 @@ func analizar(entrada string) {
 		fmt.Println("Buenas tardes")
 		os.Exit(0)
 	}
-
 }
