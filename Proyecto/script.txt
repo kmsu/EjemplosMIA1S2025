@@ -1,5 +1,10 @@
-#mkdisk -Size=3000 -unit=K -path=/home/kevin/Documentos/EjemplosMIA1S2025/Proyecto/Discos/Disco1.mia
+#mkdisk -Size=3000 -unit=K -path=/home/su-usuario/Documentos/EjemplosMIA1S2025/Proyecto/Discos/Disco1.mia
 
 #execute -path=script.txt
 
 mkdisk -Size=1 -unit=K -path=./Discos/Disco1.mia
+
+#fdisk -Size=100 -path=./Discos/Disco1.mia -name=Particion1 -unit=B
+#fdisk -Size=200 -path=./Discos/Disco1.mia -name=Particion2 -unit=B
+#fdisk -Size=300 -path=./Discos/Disco1.mia -name=Particion3 -unit=B
+#fdisk -Size=259 -path=./Discos/Disco1.mia -name=Particion4 -unit=B
