@@ -75,7 +75,7 @@ func analizar(entrada string) {
 		} else {
 			fmt.Println("MKDISK ERROR: parametros no encontrados")
 		}
-		//--------------------------------------- OTROS ------------------------------------------------------------
+
 	} else if strings.ToLower(parametros[0]) == "fdisk" {
 		//FDISK
 		if len(parametros) > 1 {
@@ -83,7 +83,14 @@ func analizar(entrada string) {
 		} else {
 			fmt.Println("FDISK ERROR: parametros no encontrados")
 		}
-
+	} else if strings.ToLower(parametros[0]) == "mount" {
+		//Mount
+		if len(parametros) > 1 {
+			DM.Mount(parametros)
+		} else {
+			fmt.Println("FDISK ERROR: parametros no encontrados")
+		}
+		//--------------------------------------- OTROS ------------------------------------------------------------
 	} else if strings.ToLower(parametros[0]) == "rep" {
 		//REP
 		if len(parametros) > 1 {
