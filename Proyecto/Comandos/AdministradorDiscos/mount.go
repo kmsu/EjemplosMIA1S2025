@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-// Para el ejemplo La letra es la particion, el numero el disco
 // Para su proyecto, la letra es el disco y el numero es la particion
 // var Pmontaje []Structs.Mount//GUarda en Ram las particones montadas
 func Mount(entrada []string) {

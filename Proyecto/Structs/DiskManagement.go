@@ -86,6 +86,10 @@ func (e *EBR) GetEnd() int32 {
 	return e.Start + e.Size + int32(binary.Size(e))
 }
 
+func GetIdMount(data Mount) string {
+	return data.MPath
+}
+
 // Reportes de los Structs
 func PrintMBR(data MBR) {
 	fmt.Println("\n     Disco")
