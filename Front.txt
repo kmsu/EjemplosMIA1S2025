@@ -1,0 +1,37 @@
+instalar react 
+npm install -g create-react-app
+
+EN CUALQUIER TERMINAL
+-----------------------------------------------------------
+
+
+----------------------------------------------------------
+EN LA RUTA DEL Proyecto
+-------------------------------------------------------------
+Crear proyecto 
+npx create-react-app [nombre] (Deben usar solo minusculas)
+
+
+
+-----------  En la ruta del front que crearon
+actualizar scripts
+npm install react-scripts@latest
+
+NOTA
+Si hubiera problemas con babel-preset-react-app y @babel/plugin-proposal-private-property-in-object
+Se soluciona con: 
+    npm install @babel/plugin-proposal-private-property-in-object
+
+NOTA: Modificar el archivo index. Debe quedar 
+
+import React from 'react';
+//import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
+
+Instalar bootstrap
+npm install bootstrap

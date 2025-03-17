@@ -1,0 +1,6 @@
+Instalar graphviz
+	sudo apt update
+	sudo apt install graphviz
+
+En una terminal de la raiz del proyecto ejecutar
+	go get -u github.com/goccy/go-graphviz

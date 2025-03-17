@@ -1,8 +1,10 @@
 package Structs
 
 import (
+	"Proyecto/Herramientas"
 	"encoding/binary"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -107,4 +109,79 @@ func PrintEbr(data EBR) {
 	fmt.Println("part_s ", data.Size)
 	fmt.Println("part_name: ", string(data.Name[:]))
 	fmt.Println("next_part: ", data.Next)
+}
+
+func RepGraphviz(data MBR, disco *os.File) string {
+	disponible := int32(0)
+	cad := ""
+	inicioLibre := int32(binary.Size(data)) //Para ir guardando desde donde hay espacio libre despues de cada particion
+	for i := 0; i < 4; i++ {
+		if data.Partitions[i].Size > 0 {
+
+			disponible = data.Partitions[i].Start - inicioLibre
+			inicioLibre = data.Partitions[i].Start + data.Partitions[i].Size
+
+			//reporta si hay espacio libre antes de la particion
+			if disponible > 0 {
+				cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#808080' COLSPAN=\"2\"> ESPACIO LIBRE <br/> %d bytes </td> \n </tr> \n", disponible)
+			}
+			//Reporta el contenido de la particion
+			cad += " <tr>\n  <td bgcolor='DeepSkyBlue' COLSPAN=\"2\"> PARTICION </td> \n </tr> \n"
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_status </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(data.Partitions[i].Status[:]))
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='LightSkyBlue'> part_type </td> \n  <td bgcolor='LightSkyBlue'> %s </td> \n </tr> \n", string(data.Partitions[i].Type[:]))
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_fit </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(data.Partitions[i].Fit[:]))
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='LightSkyBlue'> part_start </td> \n  <td bgcolor='LightSkyBlue'> %d </td> \n </tr> \n", data.Partitions[i].Start)
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_size </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", data.Partitions[i].Size)
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='LightSkyBlue'> part_name </td> \n  <td bgcolor='LightSkyBlue'> %s </td> \n </tr> \n", GetName(string(data.Partitions[i].Name[:])))
+			cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_id </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", GetId(string(data.Partitions[i].Id[:])))
+			if string(data.Partitions[i].Type[:]) == "E" {
+				cad += repLogicas(data.Partitions[i], disco)
+			}
+		}
+	}
+
+	//si hay espacio despues de la 4ta particion
+	disponible = data.MbrSize - inicioLibre
+	if disponible > 0 {
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#808080' COLSPAN=\"2\"> ESPACIO LIBRE <br/> %d bytes </td> \n </tr> \n", disponible)
+	}
+
+	return cad
+}
+
+func repLogicas(particion Partition, disco *os.File) string {
+	cad := ""
+
+	var actual EBR
+	if err := Herramientas.ReadObject(disco, &actual, int64(particion.Start)); err != nil {
+		fmt.Println("REP ERROR: No se encontro un ebr para reportar logicas")
+		return ""
+	}
+
+	//Primera logica
+	if actual.Size != 0 {
+		cad += " <tr>\n  <td bgcolor='SteelBlue' COLSPAN=\"2\"> PARTICION LOGICA </td> \n </tr> \n"
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_status </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(actual.Status[:]))
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_next </td> \n  <td bgcolor='SkyBlue'> %d </td> \n </tr> \n", actual.Next)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_fit </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(actual.Fit[:]))
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_start </td> \n  <td bgcolor='SkyBlue'> %d </td> \n </tr> \n", actual.Start)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_size </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", actual.Size)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_name </td> \n  <td bgcolor='SkyBlue'> %s </td> \n </tr> \n", GetName(string(actual.Name[:])))
+	}
+
+	//resto de logicas
+	for actual.Next != -1 {
+		if err := Herramientas.ReadObject(disco, &actual, int64(actual.Next)); err != nil {
+			fmt.Println("REP ERROR: fallo al leer particiones logicas")
+			return ""
+		}
+		cad += " <tr>\n  <td bgcolor='SteelBlue' COLSPAN=\"2\"> PARTICION LOGICA </td> \n </tr> \n"
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_status </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(actual.Status[:]))
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_next </td> \n  <td bgcolor='SkyBlue'> %d </td> \n </tr> \n", actual.Next)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_fit </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(actual.Fit[:]))
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_start </td> \n  <td bgcolor='SkyBlue'> %d </td> \n </tr> \n", actual.Start)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> part_size </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", actual.Size)
+		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='SkyBlue'> part_name </td> \n  <td bgcolor='SkyBlue'> %s </td> \n </tr> \n", GetName(string(actual.Name[:])))
+	}
+	return cad
 }
