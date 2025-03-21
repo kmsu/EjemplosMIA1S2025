@@ -10,7 +10,8 @@ import (
 )
 
 // mkdisk -Size=3000 -unit=K -path=/home/user/Disco1.mia​
-func Mkdisk(parametros []string) {
+func Mkdisk(parametros []string) string {
+	salida := ""
 	fmt.Println("MKDISK")
 	//valida entrada de parametros del comando leido
 	//PARAMETROS: -size -unit -fit -path
@@ -35,7 +36,9 @@ func Mkdisk(parametros []string) {
 		if len(tmp) != 2 {
 			fmt.Println("MKDISK Error: Valor desconocido del parametro ", tmp[0])
 			paramC = false
-			break //para finalizar el ciclo for con el error y no ejecutar lo que haga falta
+			//break //para finalizar el ciclo for con el error y no ejecutar lo que haga falta
+			return "Valor desconocido del parametro"
+
 		}
 
 		//en tmp valido que parametro viene en su primera posicion y que tenga un valor
@@ -113,7 +116,7 @@ func Mkdisk(parametros []string) {
 			// Open bin file
 			file, err := Herramientas.OpenFile(path)
 			if err != nil {
-				return
+				return "error"
 			}
 
 			// create array of byte(0)
@@ -121,7 +124,7 @@ func Mkdisk(parametros []string) {
 			newErr := Herramientas.WriteObject(file, datos, 0)
 			if newErr != nil {
 				fmt.Println("MKDISK Error: ", newErr)
-				return
+				return "error"
 			}
 
 			//obtener hora para el id
@@ -145,7 +148,7 @@ func Mkdisk(parametros []string) {
 			copy(newMBR.FechaC[:], ahora.Format("02/01/2006 15:04"))
 			// Write object in bin file
 			if err := Herramientas.WriteObject(file, newMBR, 0); err != nil {
-				return
+				return "error"
 			}
 
 			// Close bin file
@@ -156,7 +159,7 @@ func Mkdisk(parametros []string) {
 			//imprimir el disco creado para validar que todo este correcto
 			var TempMBR Structs.MBR
 			if err := Herramientas.ReadObject(file, &TempMBR, 0); err != nil {
-				return
+				return "error"
 			}
 			Structs.PrintMBR(TempMBR)
 
@@ -166,4 +169,5 @@ func Mkdisk(parametros []string) {
 			fmt.Println("MKDISK Error: Falta parametro -size")
 		}
 	}
+	return salida
 }

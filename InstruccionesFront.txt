@@ -35,3 +35,6 @@ root.render(<App />);
 
 Instalar bootstrap
 npm install bootstrap
+
+Agregar en el archivo index.js
+import 'bootstrap/dist/css/bootstrap.min.css';

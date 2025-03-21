@@ -91,6 +91,7 @@ export default function Comandos({newIp="localhost"}){
                                 className='entrada'
                                 value={textExit}
                                 id='inputComands'
+                                readOnly
                             />
                         </td>
                     </tr>

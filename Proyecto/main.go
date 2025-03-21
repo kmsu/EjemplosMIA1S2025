@@ -4,12 +4,16 @@ import (
 	Comandos "Proyecto/Comandos"
 	DM "Proyecto/Comandos/AdministradorDiscos" //DM -> DiskManagement (Administrador de discos)
 	FS "Proyecto/Comandos/SistemaDeArchivos"   //FS -> FileSystem (sistema de archivos)
+	"encoding/json"
+	"net/http"
 
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
 	//instalar go get -u github.com/rs/cors en la raiz del proyecto
+	"github.com/rs/cors"
 )
 
 type Entrada struct {
@@ -21,7 +25,7 @@ type StatusResponse struct {
 	Type    string `json:"type"`
 }
 
-/*func main() {
+func main() {
 	//EndPoint
 	http.HandleFunc("/analizar", getCadenaAnalizar)
 
@@ -36,9 +40,9 @@ type StatusResponse struct {
 	fmt.Println("Servidor escuchando en http://localhost:8080")
 	http.ListenAndServe(":8080", handler)
 
-}*/
+}
 
-func main() {
+/*func main() {
 	// MENSAJES DE INICIO
 	Ms_inicio := "Bienvenido escriba un comando..."
 	Ms_info := "(si desea salir escriba el comando: exit)"
@@ -60,10 +64,11 @@ func main() {
 		}
 	}
 }
+*/
 
-/*
 func getCadenaAnalizar(w http.ResponseWriter, r *http.Request) {
-	var respuesta string
+
+	var respuesta string //lo que retorna a la consola del front
 	// Configurar la cabecera de respuesta
 	w.Header().Set("Content-Type", "application/json")
 
@@ -114,52 +119,31 @@ func getCadenaAnalizar(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(status)
 	}
 }
-*/
 
-// func analizar(entrada string) string {
-func analizar(entrada string) {
+func analizar(entrada string) string {
+	//func analizar(entrada string) {
 	//Separar los parametros -size=3000 -path=ruta (obtenemos la lista: size=3000, path=ruta)
-	parametros := strings.Split(entrada, " -")
 
-	//respuesta := ""
+	respuesta := ""
+
+	//Quitar espacios en blanco del final
+	tmp := strings.TrimRight(entrada, " ")
+	parametros := strings.Split(tmp, " -")
+
+	// ----------------------------------------------------------------    Eliminar el if de execute en la explicacion de la clase  -----------------------------
 
 	//analizamos los parametros
-	if strings.ToLower(parametros[0]) == "execute" {
-		if len(parametros) == 2 {
-			tmpParametro := strings.Split(parametros[1], "=")
-			if strings.ToLower(tmpParametro[0]) == "path" && len(tmpParametro) == 2 {
-				//abrir el archivo
-				archivo, err := os.Open(tmpParametro[1])
-				if err != nil {
-					fmt.Println("Error al leer el script: ", err)
-					//return
-				}
-				defer archivo.Close()
-				//creo un lector de bufer para el archivo
-				lector := bufio.NewScanner(archivo)
-				//leer el archivo linea por linea
-				for lector.Scan() {
-					//Divido por # para ignorar todo lo que este a la derecha del mismo
-					linea := strings.Split(lector.Text(), "#") //lector.Text() retorna la linea leida
-					if len(linea[0]) != 0 {
-						fmt.Println("\n*********************************************************************************************")
-						fmt.Println("Linea en ejecucion: ", linea[0])
-						analizar(linea[0])
-					}
-				}
-			} else {
-				fmt.Println("EXECUTE ERROR: parametro path no encontrado")
-			}
-		}
 
-		//--------------------------------- ADMINISTRADOR DE DISCOS ------------------------------------------------
-	} else if strings.ToLower(parametros[0]) == "mkdisk" {
+	//--------------------------------- ADMINISTRADOR DE DISCOS ------------------------------------------------
+	if strings.ToLower(parametros[0]) == "mkdisk" {
 		//MKDISK
 		//crea un archivo binario que simula un disco con su respectivo MBR
 		if len(parametros) > 1 {
-			DM.Mkdisk(parametros)
+			//DM.Mkdisk(parametros)
+			respuesta = DM.Mkdisk(parametros)
 		} else {
 			fmt.Println("MKDISK ERROR: parametros no encontrados")
+			respuesta = "MKDISK ERROR: parametros no encontrados"
 		}
 
 	} else if strings.ToLower(parametros[0]) == "fdisk" {
@@ -205,5 +189,5 @@ func analizar(entrada string) {
 		fmt.Println("Comando no reconocible")
 	}
 
-	//return respuesta
+	return respuesta
 }
