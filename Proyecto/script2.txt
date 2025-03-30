@@ -1,0 +1,18 @@
+#CREACION DE DISCOS------------------------------------------------
+Mkdisk -size=20 -unit=m -path=./Discos/Disco1.mia
+
+#CREACION DE PARTICION------------------------------------------------
+fdisk -Size=7680 -path=./Discos/Disco1.mia -name=Part1 -unit=K -type=P -fit=BF
+
+#MOUNT------------------------------------------------
+mount -path=./Discos/Disco1.mia -name=Part1 #481A
+
+#CREACION DE SISTEMA DE ARCHIVOS------------------------------------------------
+mkfs -type=full -id=481A
+
+#LOGIN------------------------------------------------
+#login -user=usuario1 -pass=password -id=481A
+
+login -user=root -pass=123 -id=481A 
+
+mkdir -path=/bin

@@ -1,10 +1,6 @@
 package Structs
 
 import (
-	"Proyecto/Herramientas"
-	"encoding/binary"
-	"fmt"
-	"os"
 	"strings"
 )
 
@@ -138,69 +134,4 @@ func GetContent(nombre string) string {
 // para leer byte por byte los bitmaps (reportes)
 type Bite struct {
 	Val [1]byte
-}
-
-// REPORTES
-func RepSB(particion Partition, disco *os.File) string {
-	cad := ""
-	//cargar el superbloque
-	var SuperBloque Superblock
-	//para las logicas el superbloque se escribe/lee en particion.start+binary.size(structs.EBR)
-	err := Herramientas.ReadObject(disco, &SuperBloque, int64(particion.Start))
-	if err != nil {
-		fmt.Println("REP Error. Particion sin formato")
-		return cad
-	}
-	//LLenar los campos del reporte
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_filesystem_type </td> \n  <td bgcolor='Azure'> EXT%d </td> \n </tr> \n", SuperBloque.S_filesystem_type)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_inodes_count </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_inodes_count)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_blocks_count </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_blocks_count)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_free_inodes_count </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_free_inodes_count)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_free_blocks_count </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_free_blocks_count)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_mtime </td> \n  <td bgcolor='#7FC97F'> %s </td> \n </tr> \n", string(SuperBloque.S_mtime[:]))
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_umtime </td> \n  <td bgcolor='Azure'> %s </td> \n </tr> \n", string(SuperBloque.S_mtime[:]))
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_mnt_count </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_mnt_count)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_magic </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_magic)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_inode_size </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_inode_size)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_block_size </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_block_size)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_first_ino </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_first_ino)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_first_blo </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_first_blo)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_bm_inode_start </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_bm_inode_start)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_bm_block_start </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_bm_block_start)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_inode_start </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", SuperBloque.S_inode_start)
-	cad += fmt.Sprintf(" <tr>\n  <td bgcolor='Azure'> S_block_start </td> \n  <td bgcolor='Azure'> %d </td> \n </tr> \n", SuperBloque.S_block_start)
-	if SuperBloque.S_filesystem_type == 3 {
-		var journal Journaling
-		Herramientas.ReadObject(disco, &journal, int64(particion.Start+int32(binary.Size(Superblock{}))))
-		cad += fmt.Sprintf(" <tr>\n  <td bgcolor='#7FC97F'> S_journaling_size </td> \n  <td bgcolor='#7FC97F'> %d </td> \n </tr> \n", journal.Size)
-	}
-	return cad
-}
-
-func RepJournal(particion Partition, disco *os.File) string {
-	cad := ""
-	//cargar el superbloque
-	var superBloque Superblock
-	err := Herramientas.ReadObject(disco, &superBloque, int64(particion.Start))
-	if err != nil {
-		fmt.Println("REP Error. Particion sin formato")
-		cad += " <tr>\n  <td> Error No Journaling </td> \n </tr> \n"
-		return cad
-	}
-
-	if superBloque.S_filesystem_type == 3 {
-		//Cargar el journaling
-		var journal Journaling
-		//Nota: para las logicas el superbloque se escribe/lee en particion.start+binary.size(structs.EBR)
-		Herramientas.ReadObject(disco, &journal, int64(particion.Start+int32(binary.Size(Superblock{}))))
-		for i := int32(0); i <= journal.Ultimo; i++ {
-			dataJ := journal.Contenido[i]
-			cad += " <tr>\n  <td> Operacion </td> \n  <td> Path </td> \n  <td> Contenido </td> \n  <td> Fecha </td> \n </tr> \n"
-			cad += fmt.Sprintf(" <tr>\n  <td> %s </td> \n  <td> %s </td> \n  <td> %s </td> \n  <td> %s </td> \n </tr> \n", GetOperation(string(dataJ.Operation[:])), GetPath(string(dataJ.Path[:])), GetContent(string(dataJ.Content[:])), string(dataJ.Date[:]))
-		}
-	} else {
-		cad += " <tr>\n  <td> Error No Journaling </td> \n </tr> \n"
-		fmt.Println("REP Error: No se encontro Journaling debido a que la particion no tiene formato EXT3")
-	}
-	return cad
 }

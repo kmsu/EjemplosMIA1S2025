@@ -2,8 +2,10 @@ package main
 
 import (
 	Comandos "Proyecto/Comandos"
-	DM "Proyecto/Comandos/AdministradorDiscos" //DM -> DiskManagement (Administrador de discos)
-	FS "Proyecto/Comandos/SistemaDeArchivos"   //FS -> FileSystem (sistema de archivos)
+	DFPM "Proyecto/Comandos/AdminPermisosPaths" //DFPM -> Directory, File, Permision Management (Administrador de carpetas, archivos y permisos)
+	DM "Proyecto/Comandos/AdministradorDiscos"  //DM -> DiskManagement (Administrador de discos)
+	FS "Proyecto/Comandos/SistemaDeArchivos"    //FS -> FileSystem (sistema de archivos)
+	US "Proyecto/Comandos/Users"                //US -> UserS
 	"encoding/json"
 	"net/http"
 
@@ -169,6 +171,16 @@ func analizar(entrada string) string {
 		} else {
 			fmt.Println("MKFS ERROR: parametros no encontrados")
 		}
+
+		//--------------------------------------- USERS ------------------------------------------------------------
+	} else if strings.ToLower(parametros[0]) == "login" {
+		//LOGIN
+		if len(parametros) > 1 {
+			US.Login(parametros)
+		} else {
+			fmt.Println("LOGIN ERROR: parametros no encontrados")
+		}
+
 		//--------------------------------------- OTROS ------------------------------------------------------------
 	} else if strings.ToLower(parametros[0]) == "rep" {
 		//REP
@@ -179,6 +191,13 @@ func analizar(entrada string) string {
 			fmt.Println("REP ERROR: parametros no encontrados")
 		}
 
+	} else if strings.ToLower(parametros[0]) == "mkdir" {
+		//MKDIR
+		if len(parametros) > 1 {
+			DFPM.Mkdir(parametros)
+		} else {
+			fmt.Println("MKDIR ERROR: parametros no encontrados")
+		}
 	} else if strings.ToLower(parametros[0]) == "exit" {
 		fmt.Println("Salida exitosa")
 		os.Exit(0)

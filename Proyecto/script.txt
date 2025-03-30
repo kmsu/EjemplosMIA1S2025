@@ -17,6 +17,6 @@ mount -path=./Discos/Disco2.mia -name=Particion3
 mount -path=./Discos/Disco1.mia -name=Particion2
 mount -path=./Discos/Disco2.mia -name=Particion4
 
-#mkfs -id=482B
+mkfs -id=482B
 
-rep -id=482B -path=/Reportes/mbrB.jpg -name=mbr
+#rep -id=482B -path=/Reportes/mbrB.jpg -name=mbr

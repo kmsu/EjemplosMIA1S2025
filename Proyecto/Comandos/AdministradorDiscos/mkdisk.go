@@ -166,7 +166,7 @@ func Mkdisk(parametros []string) string {
 			fmt.Println("\n======End MKDISK======")
 
 		} else {
-			fmt.Println("MKDISK Error: Falta parametro -size")
+			fmt.Println("MKDISK Error: Falta parametro -size o -path")
 		}
 	}
 	return salida
